@@ -1,4 +1,8 @@
 # -*- mode: gitignore; -*-
+.esphome
+macs
+secrets.yaml
+esp_*/
 *~
 \#*\#
 /.emacs.desktop

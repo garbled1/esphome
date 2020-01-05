@@ -1,0 +1,15 @@
+substitutions:
+  devicename: xxx
+  upper_devicename: XXX
+  friendly_name: XXX
+
+<<: !include base_config.yaml
+
+text_sensor:
+  - platform: version
+    name: ${friendly_name} ESPHome Version
+
+sensor:
+  - platform: wifi_signal
+    name: ${friendly_name} WiFi Signal Strength
+    update_interval: 60s

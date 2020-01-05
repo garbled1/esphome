@@ -1,0 +1,28 @@
+esphome:
+  name: esp_${devicename}
+  platform: ESP8266
+  board: d1_mini
+
+wifi:
+  networks:
+    - ssid: !secret wifi_ssid
+      password: !secret wpa_pass
+    - ssid: !secret wifi_ssid_ha
+      password: !secret wpa_pass
+  domain: .garbled.net
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "${upper_devicename} Fallback Hotspot"
+    password: !secret portal_pass
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+
