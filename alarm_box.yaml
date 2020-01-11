@@ -1,0 +1,99 @@
+substitutions:
+  devicename: alarmbox_annie
+  upper_devicename: AlarmBox_Annie
+  friendly_name: Alarm Box Annie
+
+<<: !include base_config.yaml
+
+i2c:
+  sda: D2
+  scl: D1
+  scan: True
+  id: bus_a
+
+text_sensor:
+  - platform: version
+    name: ${friendly_name} ESPHome Version
+
+time:
+  - platform: homeassistant
+    id: esptime
+
+font:
+  - file: 'slkscr.ttf'
+    id: tiny_font
+    size: 8
+
+  - file: 'bebas.ttf'
+    id: nice_font
+    size: 36
+    glyphs: "0123456789: "
+
+  - file: 'arial_narrow_7.ttf'
+    id: thin_font
+    size: 12
+    # glyphs: "0123456789°%.Alarm:"
+
+image:
+  - file: "bell-on.png"
+    id: bell_on
+    resize: 16x16
+  - file: "bell-off.png"
+    id: bell_off
+    resize: 16x16
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: D5
+      mode: INPUT_PULLUP
+    name: Annie Alarm Switch
+    filters:
+      - invert:
+  - platform: homeassistant
+    id: ha_switch_state
+    entity_id: binary_sensor.annie_alarm_switch
+    internal: true
+    filters:
+      - lambda: |-
+          if (id(ha_switch_state).state) {
+              id(oled).image(112, 0, id(bell_on));
+          } else {
+              id(oled).image(112, 0, id(bell_off));
+          }
+          return x;
+
+# maybe 78 maybe 7a
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x64"
+    # reset_pin: D0
+    address: 0x3C
+    id: oled
+    lambda: |-
+      it.strftime(0, 0, id(thin_font), TextAlign::TOP_LEFT,
+          "%a %b %d %Y", id(esptime).now());
+      it.strftime(64, 16, id(nice_font), TextAlign::TOP_CENTER, "%H:%M",
+          id(esptime).now());
+      if (id(ha_switch_state).state) {
+          it.image(112, 0, id(bell_on));
+      } else {
+          it.image(112, 0, id(bell_off));
+      }
+
+sensor:
+  - platform: wifi_signal
+    name: ${friendly_name} WiFi Signal Strength
+    update_interval: 60s
+
+  - platform: bme680
+    temperature:
+      name: "${friendly_name} Temperature"
+    pressure:
+      name: "${friendly_name} Pressure"
+    humidity:
+      name: "${friendly_name} Humidity"
+    gas_resistance:
+      name: "${friendly_name} Gas Resistance"
+    update_interval: 60s
+    address: 0x77
