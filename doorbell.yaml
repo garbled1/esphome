@@ -1,0 +1,25 @@
+substitutions:
+  devicename: front_doorbell
+  upper_devicename: Front_Doorbell
+  friendly_name: Front Door Bell
+
+<<: !include base_config.yaml
+
+text_sensor:
+  - platform: version
+    name: ${friendly_name} ESPHome Version
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: D5
+      mode: INPUT_PULLUP
+    name: Front Doorbell
+    filters:
+      - invert:
+      - delayed_off: 30s
+  - platform: homeassistant
+    id: ha_switch_state
+    entity_id: binary_sensor.doorbell_front
+    internal: true
+ 
