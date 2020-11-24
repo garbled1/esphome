@@ -22,4 +22,8 @@ binary_sensor:
     id: ha_switch_state
     entity_id: binary_sensor.doorbell_front
     internal: true
- 
+
+sensor:
+  - platform: wifi_signal
+    name: ${friendly_name} WiFi Signal Strength
+    update_interval: 60s
