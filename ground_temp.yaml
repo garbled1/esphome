@@ -1,0 +1,50 @@
+substitutions:
+  devicename: grounddepthtemp
+  upper_devicename: Ground DepthTmp
+  friendly_name: Ground DepthTmp
+
+<<: !include base_config.yaml
+
+text_sensor:
+  - platform: version
+    name: ${friendly_name} ESPHome Version
+
+# Example configuration entry
+dallas:
+  - pin: D5
+
+# [09:31:12][D][dallas.sensor:082]:     0xD43C01D60709F428 - long 36"
+# [09:31:12][D][dallas.sensor:082]:     0x683C01D607404C28 - 18"
+# [09:31:12][D][dallas.sensor:082]:     0xEC3C01D607CB0128 - 12"
+# [09:31:12][D][dallas.sensor:082]:     0xED3C01D607DD5B28 - 30"
+# [09:31:12][D][dallas.sensor:082]:     0xF33C01D60720B728 - 24"
+
+
+sensor:
+  - platform: wifi_signal
+    name: ${friendly_name} WiFi Signal Strength
+    update_interval: 60s
+
+  - platform: dallas
+    address: 0xD43C01D60709F428
+    name: GroundTemp 36in Depth
+
+  - platform: dallas
+    address: 0xED3C01D607DD5B28
+    name: GroundTemp 30in Depth
+
+  - platform: dallas
+    address: 0xF33C01D60720B728
+    name: GroundTemp 24in Depth
+
+  - platform: dallas
+    address: 0x683C01D607404C28
+    name: GroundTemp 18in Depth
+
+  - platform: dallas
+    address: 0xEC3C01D607CB0128
+    name: GroundTemp 12in Depth
+
+  - platform: dallas
+    address: 0xA503079779894E28
+    name: GroundTemp 6in Depth
