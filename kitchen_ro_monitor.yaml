@@ -1,0 +1,169 @@
+substitutions:
+  prefix: kitchen
+  location: kitchen
+  devicename: ro_monitor_${prefix}
+  upper_devicename: ${location} RO Monitor
+  friendly_name: ${location} RO Monitor
+  short_name: ${prefix} RO Monitor
+
+globals:
+  - id: tcomp
+    type: float
+    restore_value: no
+    initial_value: '21.0'
+  - id: tgal
+    type: float
+    restore_value: yes
+    initial_value: '0.0'
+
+<<: !include esp32_base_config.yaml
+
+font:
+  - file: 'arial_narrow_7.ttf'
+    id: thin_font
+    size: 12
+    # glyphs: "0123456789°%.Alarm:"
+
+i2c:
+  sda: 21
+  scl: 22
+  scan: True
+  id: bus_a
+
+text_sensor:
+  - platform: version
+    name: ${friendly_name} ESPHome Version
+
+ads1115:
+  - address: 0x48
+    i2c_id: bus_a
+    continuous_mode: off
+
+sensor:
+  - platform: ads1115
+    multiplexer: 'A0_GND'
+    gain: 2.048
+    name: "${friendly_name} TDS1"
+    id: '${prefix}_tds1'
+    update_interval: 1s
+    filters:
+      - sliding_window_moving_average:
+          window_size: 60
+          send_every: 60
+          send_first_at: 10
+      - lambda: |-
+          float tc, tv;
+          tc = 1.0 + 0.02 * (id(tcomp) - 25.0);
+          tv = x / tc;
+          return( ( (133.42*tv*tv*tv) - (255.86*tv*tv) + (857.39*tv) ) * 0.5);
+    unit_of_measurement: "ppm"
+    icon: 'mdi:cup-water'
+
+  - platform: ads1115
+    multiplexer: 'A1_GND'
+    gain: 2.048
+    name: "${friendly_name} TDS2"
+    id: '${prefix}_tds2'
+    update_interval: 1s
+    filters:
+      - sliding_window_moving_average:
+          window_size: 60
+          send_every: 60
+          send_first_at: 10
+      - lambda: |-
+          float tc, tv;
+          tc = 1.0 + 0.02 * (id(tcomp) - 25.0);
+          tv = x / tc;
+          return( ( (133.42*tv*tv*tv) - (255.86*tv*tv) + (857.39*tv) ) * 0.5);
+    unit_of_measurement: "ppm"
+    icon: 'mdi:cup-water'
+
+  # - platform: ads1115
+  #   multiplexer: 'A2_GND'
+  #   gain: 2.048
+  #   name: "${friendly_name} TDS3"
+  #   id: '${prefix}_tds3'
+  #   update_interval: 1s
+  #   filters:
+  #     - sliding_window_moving_average:
+  #         window_size: 60
+  #         send_every: 60
+  #         send_first_at: 10
+  #     - lambda: |-
+  #         float tc, tv;
+  #         tc = 1.0 + 0.02 * (id(tcomp) - 25.0);
+  #         tv = x / tc;
+  #         return( ( (133.42*tv*tv*tv) - (255.86*tv*tv) + (857.39*tv) ) * 0.5);
+  #   unit_of_measurement: "ppm"
+  #   icon: 'mdi:cup-water'
+
+  - platform: ads1115
+    multiplexer: 'A3_GND'
+    gain: 6.144
+    name: "${friendly_name} Pressure"
+    id: '${prefix}_pres'
+    update_interval: 1s
+    filters:
+      - sliding_window_moving_average:
+          window_size: 60
+          send_every: 60
+          send_first_at: 10
+      - lambda: return( x * (100/4.5) );
+      - calibrate_linear:
+          - 10.0 -> 0.0
+          - 24.81 -> 20.0
+          - 37.16 -> 34.0
+    unit_of_measurement: "psi"
+    icon: 'mdi:gauge'
+
+  - platform: pulse_counter
+    pin: 19
+    unit_of_measurement: 'gpm'
+    name: '${friendly_name} Feed Water GPM'
+    id: '${prefix}_feedw'
+    icon: 'mdi:pump'
+    filters:
+      - lambda: |-
+          id(tgal) += x * 0.2641729 / 60.0 / 38.0;
+          return( x * 0.2641729 / 60.0 / 38.0 );
+
+  - platform: integration
+    name: "${friendly_name} Feed Water GPH"
+    sensor: '${prefix}_feedw'
+    time_unit: h
+    unit_of_measurement: 'gph'
+    id: '${prefix}_feedw_gph'
+    icon: 'mdi:pump'
+
+  - platform: integration
+    name: "${friendly_name} Feed Water GPD"
+    sensor: '${prefix}_feedw'
+    time_unit: d
+    unit_of_measurement: 'gpd'
+    id: '${prefix}_feedw_gpd'
+    icon: 'mdi:pump'
+
+  - platform: template
+    name: "${friendly_name} Total Gallons"
+    id: "${prefix}_total_gal"
+    unit_of_measurement: 'gal'
+    lambda: return id(tgal);
+    icon: 'mdi:gauge-full'
+
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x64"
+    address: 0x3C
+    i2c_id: bus_a
+    lambda: |-
+      it.printf(0, 6, id(thin_font), "TDS1: %.1f", id(${prefix}_tds1).state);
+      it.printf(64, 6, id(thin_font), "TDS2: %.1f", id(${prefix}_tds2).state);
+      //it.printf(0, 20, id(thin_font), "TDS3: %.1f", id(${prefix}_tds3).state);
+      it.printf(64, 20, id(thin_font), "Pres: %.1f", id(${prefix}_pres).state);
+      it.printf(0, 34, id(thin_font), "GPM: %.2f", id(${prefix}_feedw).state);
+      it.printf(64, 34, id(thin_font), "GPH: %.2f", id(${prefix}_feedw_gph).state);
+      it.printf(0, 48, id(thin_font), "GPD: %.2f", id(${prefix}_feedw_gpd).state);
+      it.printf(64, 48, id(thin_font), "TGal: %.2f", id(tgal));
+
+#web_server:
+#  port: 80

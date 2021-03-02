@@ -1,0 +1,250 @@
+substitutions:
+  prefix: phoenix
+  location: phoenix
+  devicename: ult_breakout_${prefix}
+  upper_devicename: ${location} Ultimate Breakout
+  friendly_name: ${location} Ultimate Breakout
+  short_name: ${prefix} Ult Breakout
+
+globals:
+  - id: green_bad
+    type: float
+    restore_value: no
+    initial_value: '90.0'
+  - id: blue_bad
+    type: float
+    restore_value: no
+    initial_value: '85.0'
+  - id: rgb_bad
+    type: float
+    restore_value: no
+    initial_value: '240.0'
+
+<<: !include esp32_base_config.yaml
+
+font:
+  - file: 'arial_narrow_7.ttf'
+    id: thin_font
+    size: 12
+    # glyphs: "0123456789°%.Alarm:"
+
+i2c:
+  - id: bus_a
+    sda: 21
+    scl: 22
+    scan: True
+  - id: bus_b
+    sda: 18
+    scl: 19
+    scan: True
+  
+text_sensor:
+  - platform: version
+    name: ${friendly_name} ESPHome Version
+
+sensor:
+  - platform: bme280
+    temperature:
+      name: "${prefix} UB Temperature"
+      id: bme280_temperature
+    pressure:
+      name: "${prefix} UB Pressure"
+      id: bme280_pressure
+    humidity:
+      name: "${prefix} UB Relative Humidity"
+      id: bme280_humidity
+      filters:
+        - lambda: |
+            if (x < 35.0) {
+                id(relay_3).turn_off();
+                id(relay_4).turn_off();
+            }
+            if (x >= 35.0 && x < 55.0) {
+                id(relay_3).turn_on();
+                id(relay_4).turn_off();
+            }
+            if (x >= 55.0 && x < 75.0) {
+                id(relay_3).turn_off();
+                id(relay_4).turn_on();
+            }
+            if (x >= 75.0) {
+                id(relay_3).turn_on();
+                id(relay_4).turn_on();
+            }
+            return(x);
+    address: 0x76
+    update_interval: 60s
+    i2c_id: bus_a
+
+  - platform: tcs34725
+    red_channel:
+      name: "DI2 Red Channel"
+      id: di2_r
+      filters:
+        - sliding_window_moving_average:
+            window_size: 10
+            send_every: 10
+            send_first_at: 10
+    green_channel:
+      name: "DI2 Green Channel"
+      id: di2_g
+      filters:
+        - sliding_window_moving_average:
+            window_size: 10
+            send_every: 10
+            send_first_at: 10
+    blue_channel:
+      name: "DI2 Blue Channel"
+      id: di2_b
+      filters:
+        - sliding_window_moving_average:
+            window_size: 10
+            send_every: 10
+            send_first_at: 10
+    clear_channel:
+      name: "DI2 Clear Channel"
+      id: di2_c
+      filters:
+        - sliding_window_moving_average:
+            window_size: 10
+            send_every: 10
+            send_first_at: 10
+    illuminance:
+      name: "DI2 Illuminance"
+      id: di2_i
+      filters:
+        - sliding_window_moving_average:
+            window_size: 10
+            send_every: 10
+            send_first_at: 10
+    color_temperature:
+      name: "DI2 Color Temperature"
+      id: di2_k
+      filters:
+        - sliding_window_moving_average:
+            window_size: 10
+            send_every: 10
+            send_first_at: 10
+    gain: 1x
+    integration_time: 50ms
+    address: 0x29
+    update_interval: 5s
+    i2c_id: bus_b
+
+  - platform: tcs34725
+    red_channel:
+      name: "DI1 Red Channel"
+      id: di1_r
+      filters:
+        - sliding_window_moving_average:
+            window_size: 10
+            send_every: 10
+            send_first_at: 10
+    green_channel:
+      name: "DI1 Green Channel"
+      id: di1_g
+      filters:
+        - sliding_window_moving_average:
+            window_size: 10
+            send_every: 10
+            send_first_at: 10
+    blue_channel:
+      name: "DI1 Blue Channel"
+      id: di1_b
+      filters:
+        - sliding_window_moving_average:
+            window_size: 10
+            send_every: 10
+            send_first_at: 10
+    clear_channel:
+      name: "DI1 Clear Channel"
+      id: di1_c
+      filters:
+        - sliding_window_moving_average:
+            window_size: 10
+            send_every: 10
+            send_first_at: 10
+    illuminance:
+      name: "DI1 Illuminance"
+      id: di1_i
+      filters:
+        - sliding_window_moving_average:
+            window_size: 10
+            send_every: 10
+            send_first_at: 10
+    color_temperature:
+      name: "DI1 Color Temperature"
+      id: di1_k
+      filters:
+        - sliding_window_moving_average:
+            window_size: 10
+            send_every: 10
+            send_first_at: 10
+    gain: 1x
+    integration_time: 50ms
+    address: 0x29
+    update_interval: 5s
+    i2c_id: bus_a
+
+switch:
+  - platform: gpio
+    pin: 13
+    name: "Relay 1"
+    id: relay_1
+    restore_mode: ALWAYS_OFF
+  - platform: gpio
+    pin: 27
+    name: "Relay 2"
+    id: relay_2
+    restore_mode: ALWAYS_OFF
+  - platform: gpio
+    pin: 26
+    name: "Relay 3"
+    id: relay_3
+    restore_mode: ALWAYS_OFF
+  - platform: gpio
+    pin: 25
+    name: "Relay 4"
+    id: relay_4
+    restore_mode: ALWAYS_OFF
+
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x64"
+    address: 0x3C
+    i2c_id: bus_a
+    lambda: |-
+      it.printf(0, 6, id(thin_font), "Humidity: %.1f", id(bme280_humidity).state);
+      it.printf(0, 20, id(thin_font), "Temp: %.1f", id(bme280_temperature).state * (9.0/5.0) + 32.0);
+      if (id(relay_1).state)
+          it.printf(0, 34, id(thin_font), "DI 1: BAD");
+      else
+          it.printf(0, 34, id(thin_font), "DI 1: OK");
+      if (id(relay_2).state)
+          it.printf(64, 34, id(thin_font), "DI 2: BAD");
+      else
+          it.printf(64, 34, id(thin_font), "DI 2: OK");
+      if (id(relay_3).state)
+          it.printf(0, 48, id(thin_font), "SW 3: ON");
+      else
+          it.printf(0, 48, id(thin_font), "SW 3: OFF");
+      if (id(relay_4).state)
+          it.printf(64, 48, id(thin_font), "SW 4: ON");
+      else
+          it.printf(64, 48, id(thin_font), "SW 4: OFF");
+
+interval:
+  - interval: 60s
+    then:
+      - lambda: |
+          if ((id(di1_g).state > id(green_bad) && id(di1_b).state > id(blue_bad)) || (id(di1_r).state + id(di1_b).state + id(di1_g).state) > id(rgb_bad))
+            id(relay_1).turn_on();
+          else
+            id(relay_1).turn_off();
+          if ((id(di2_g).state > id(green_bad) && id(di2_b).state > id(blue_bad)) || (id(di2_r).state + id(di2_b).state + id(di2_g).state) > id(rgb_bad))
+            id(relay_2).turn_on();
+          else
+            id(relay_2).turn_off();
+
+#web_server:
+#  port: 80

@@ -1,7 +1,7 @@
 substitutions:
-  devicename: dualbme_1
-  upper_devicename: DualBME_1
-  friendly_name: Dual BME 1
+  devicename: caveac_dualbme
+  upper_devicename: CaveAc_DualBME
+  friendly_name: Cave AC Filter
 
 <<: !include base_config.yaml
 
@@ -23,10 +23,17 @@ sensor:
   - platform: bme280
     temperature:
       name: "${friendly_name} Inside Temperature"
+      filters:
+        offset: 0.7
     pressure:
       name: "${friendly_name} Inside Pressure"
+      id: i_pres
+      filters:
+        offset: 0.37
     humidity:
       name: "${friendly_name} Inside Humidity"
+      filters:
+        offset: -0.5
     update_interval: 60s
     address: 0x77
   - platform: bme280
@@ -34,7 +41,16 @@ sensor:
       name: "${friendly_name} Outside Temperature"
     pressure:
       name: "${friendly_name} Outside Pressure"
+      id: o_pres
     humidity:
       name: "${friendly_name} Outside Humidity"
     update_interval: 60s
     address: 0x76
+  - platform: template
+    name: "${friendly_name} Pressure Difference"
+    update_interval: 60s
+    lambda: |-
+      return(id(i_pres).state - id(o_pres).state);
+    icon: mdi:arrow-collapse-vertical
+    unit_of_measurement: 'hPa'
+    accuracy_decimals: 3
