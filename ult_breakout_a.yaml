@@ -10,15 +10,15 @@ globals:
   - id: green_bad
     type: float
     restore_value: no
-    initial_value: '90.0'
+    initial_value: '85.0'
   - id: blue_bad
     type: float
     restore_value: no
-    initial_value: '85.0'
-  - id: rgb_bad
+    initial_value: '76.0'
+  - id: rgc_bad
     type: float
     restore_value: no
-    initial_value: '240.0'
+    initial_value: '200.0'
 
 <<: !include esp32_base_config.yaml
 
@@ -237,11 +237,11 @@ interval:
   - interval: 60s
     then:
       - lambda: |
-          if ((id(di1_g).state > id(green_bad) && id(di1_b).state > id(blue_bad)) || (id(di1_r).state + id(di1_b).state + id(di1_g).state) > id(rgb_bad))
+          if ((id(di1_g).state > id(green_bad) && id(di1_b).state > id(blue_bad)) || (id(di1_c).state + id(di1_b).state + id(di1_g).state) > id(rgc_bad))
             id(relay_1).turn_on();
           else
             id(relay_1).turn_off();
-          if ((id(di2_g).state > id(green_bad) && id(di2_b).state > id(blue_bad)) || (id(di2_r).state + id(di2_b).state + id(di2_g).state) > id(rgb_bad))
+          if ((id(di2_g).state > id(green_bad) && id(di2_b).state > id(blue_bad)) || (id(di2_c).state + id(di2_b).state + id(di2_g).state) > id(rgc_bad))
             id(relay_2).turn_on();
           else
             id(relay_2).turn_off();
