@@ -1,0 +1,37 @@
+substitutions:
+  devicename: somfy_urtsii_test
+  upper_devicename: Somfy_URTSII_test
+  friendly_name: Rear Porch Shade
+
+<<: !include base_config.yaml
+
+uart:
+  tx_pin: 3
+  rx_pin: 4
+  baud_rate: 9600
+
+text_sensor:
+  - platform: version
+    name: ${friendly_name} ESPHome Version
+
+sensor:
+  - platform: wifi_signal
+    name: ${friendly_name} WiFi Signal Strength
+    update_interval: 60s
+
+cover:
+  - platform: time_based
+    name: ${friendly_name} North
+
+    open_action:
+      - uart.write: '0101U'
+    open_duration: 60s
+
+    close_action:
+      - uart.write: '0101D'
+    close_duration: 60s
+
+    stop_action:
+      - uart.write: '0101S'
+
+    
