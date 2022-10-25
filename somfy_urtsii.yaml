@@ -1,14 +1,61 @@
 substitutions:
   devicename: somfy_urtsii_test
-  upper_devicename: Somfy_URTSII_test
+  upper_devicename: So_URTSII_test
   friendly_name: Rear Porch Shade
 
 <<: !include base_config.yaml
+esphome:
+  name: esp_${devicename}
+  platform: ESP8266
+  board: d1_mini
+  on_boot:
+    priority: -100
+    then:
+      - uart.write:
+          id: somfy_uart
+          data: "0101D\r\n"
+      - delay: 2s
+      - uart.write:
+          id: somfy_uart
+          data: "0101D\r\n"
+      - delay: 2s
+      - uart.write:
+          id: somfy_uart
+          data: "0101D\r"
+      - delay: 2s
+      - uart.write:
+          id: somfy_uart
+          data: "0101D\r"
+      - logger.log: 'Sent DOWN on channel 1'
+
+wifi:
+  networks:
+    - ssid: !secret wifi_ssid
+      password: !secret wpa_pass
+    - ssid: !secret wifi_ssid_ha
+      password: !secret wpa_pass
+  domain: .garbled.net
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "${upper_devicename} Fallback Hotspot"
+    password: !secret portal_pass
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
 
 uart:
-  tx_pin: 3
-  rx_pin: 4
+  tx_pin: D2
+  rx_pin: D1
   baud_rate: 9600
+  id: somfy_uart
 
 text_sensor:
   - platform: version

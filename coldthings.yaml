@@ -1,0 +1,44 @@
+substitutions:
+  devicename: coldthings
+  upper_devicename: Cold Things
+  friendly_name: Cold Things
+
+<<: !include base_config.yaml
+
+text_sensor:
+  - platform: version
+    name: ${friendly_name} ESPHome Version
+
+# Example configuration entry
+dallas:
+  - pin: D2
+    update_interval: 60s
+
+# [18:10:35][D][dallas.sensor:079]:   Found sensors:
+# [18:10:35][D][dallas.sensor:082]:     0x4C03089779E42428
+# [18:10:35][D][dallas.sensor:082]:     0xAF03079779B99328
+# [18:10:35][D][dallas.sensor:082]:     0xC00307977932DB28
+# [18:15:22][D][dallas.sensor:082]:     0xB300000527CEA628
+ 
+
+sensor:
+  - platform: wifi_signal
+    name: ${friendly_name} WiFi Signal Strength
+    update_interval: 60s
+
+# A
+  - platform: dallas
+    address: 0x4C03089779E42428
+    name: Kitchen Freezer
+# B
+  - platform: dallas
+    address: 0xAF03079779B99328
+    name: Kitchen Fridge
+# C
+  - platform: dallas
+    address: 0xC00307977932DB28
+    name: IceMaker
+# Single Chip
+  - platform: dallas
+    address: 0xB300000527CEA628
+    name: IceMaker Cabinet
