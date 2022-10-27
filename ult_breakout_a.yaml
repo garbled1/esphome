@@ -1,7 +1,7 @@
 substitutions:
   prefix: phoenix
   location: phoenix
-  devicename: ult_breakout_${prefix}
+  devicename: ult-breakout-${prefix}
   upper_devicename: ${location} Ultimate Breakout
   friendly_name: ${location} Ultimate Breakout
   short_name: ${prefix} Ult Breakout

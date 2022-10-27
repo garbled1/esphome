@@ -1,5 +1,5 @@
 esphome:
-  name: esp_${devicename}
+  name: esp-${devicename}
   platform: ESP8266
   board: d1_mini
 
@@ -10,6 +10,7 @@ wifi:
     - ssid: !secret wifi_ssid_ha
       password: !secret wpa_pass
   domain: .garbled.net
+  #use_address: 192.168.11.213
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:

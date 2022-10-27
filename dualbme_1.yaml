@@ -1,5 +1,5 @@
 substitutions:
-  devicename: caveac_dualbme
+  devicename: caveac-dualbme
   upper_devicename: CaveAc_DualBME
   friendly_name: Cave AC Filter
 

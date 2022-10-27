@@ -1,5 +1,5 @@
 substitutions:
-  devicename: front_doorbell
+  devicename: front-doorbell
   upper_devicename: Front_Doorbell
   friendly_name: Front Door Bell
 

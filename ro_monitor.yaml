@@ -1,7 +1,7 @@
 substitutions:
   prefix: phx
   location: Phoenix
-  devicename: ro_monitor_${prefix}
+  devicename: ro-monitor-${prefix}
   upper_devicename: ${location} RO Monitor
   friendly_name: ${location} RO Monitor
   short_name: ${prefix} RO Monitor

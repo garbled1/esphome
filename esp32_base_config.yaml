@@ -1,5 +1,5 @@
 esphome:
-  name: esp_${devicename}
+  name: esp-${devicename}
   platform: ESP32
   board: esp32doit-devkit-v1
 
@@ -10,6 +10,7 @@ wifi:
     - ssid: !secret wifi_ssid_ha
       password: !secret wpa_pass
   domain: .garbled.net
+  # use_address: 192.168.11.71
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
@@ -25,3 +26,12 @@ logger:
 api:
 
 ota:
+
+esp32_ble_tracker:
+  scan_parameters:
+    interval: 1100ms
+    window: 1100ms
+    active: true
+
+bluetooth_proxy:
+  active: true

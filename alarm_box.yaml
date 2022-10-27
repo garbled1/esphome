@@ -1,5 +1,5 @@
 substitutions:
-  devicename: alarmbox_annie
+  devicename: alarmbox-annie
   upper_devicename: AlarmBox_Annie
   friendly_name: Alarm Box Annie
 
