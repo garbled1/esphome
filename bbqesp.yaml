@@ -1,0 +1,21 @@
+substitutions:
+  devicename: bbqesp32
+  upper_devicename: BBQ ESP
+  friendly_name: BBQ ESP
+  short_name: BBQ ESP
+
+<<: !include esp32_base_config.yaml
+
+text_sensor:
+  - platform: version
+    name: ${friendly_name} ESPHome Version
+
+sensor:
+  - platform: hx711
+    name: "${short_name} Propane Tank Weight"
+    dout_pin: 18
+    clk_pin: 19
+    gain: 64
+    update_interval: 60s
+    unit_of_measurement: lbs
+    id: "${devicename}_propane_weight"
