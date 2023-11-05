@@ -1,0 +1,121 @@
+substitutions:
+  prefix: patio
+  location: RearPatio
+  devicename: ${prefix}-shades
+  upper_devicename: ${location} Shades
+  friendly_name: ${location} Shades
+  short_name: ${prefix} Shades
+
+esphome:
+  name: esp-${devicename}
+  platform: ESP32
+  board: esp32doit-devkit-v1
+  libraries:
+    - EEPROM
+    - SPI
+    - SmartRC-CC1101-Driver-Lib@2.5.6
+    - Somfy_Remote_Lib@0.4.1
+  includes:
+    - somfy_cover.h
+
+wifi:
+  networks:
+    - ssid: !secret wifi_ssid
+      password: !secret wpa_pass
+    - ssid: !secret wifi_ssid_ha
+      password: !secret wpa_pass
+  domain: .garbled.net
+  # use_address: 192.168.11.71
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "${short_name} FB Hotspot"
+    password: !secret portal_pass
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+esp32_ble_tracker:
+  scan_parameters:
+    interval: 1100ms
+    window: 1100ms
+    active: true
+
+bluetooth_proxy:
+  active: true
+
+text_sensor:
+  - platform: version
+    name: ${friendly_name} ESPHome Version
+
+web_server:
+  port: 80
+
+sensor:
+  - platform: uptime
+    name: Uptime Sensor\core_configurator
+
+  - platform: wifi_signal
+    name: "WiFi Signal Sensor"
+
+
+cover:
+  - platform: custom
+    lambda: |-
+      auto somfy_remote = new SomfyESPRemote();
+      byte mac[6];
+      uint32_t somfy_addr = 0;
+      WiFi.macAddress(mac);
+      somfy_addr = (mac[5] << 16) + (mac[4] << 8) + mac[3];
+      ESP_LOGD("somfy_addr", "Channel address: %06x", somfy_addr);
+      ESP_LOGD("somfy_addr", "Channel address: %06x", somfy_addr+1);
+      ESP_LOGD("somfy_addr", "Channel address: %06x", somfy_addr+2);
+      ESP_LOGD("somfy_addr", "Channel address: %06x", somfy_addr+3);
+      somfy_remote->add_cover("somfy", "CH01", somfy_addr);
+      somfy_remote->add_cover("somfy", "CH02", somfy_addr+1);
+      somfy_remote->add_cover("somfy", "CH03", somfy_addr+2);
+      somfy_remote->add_cover("somfy", "CH04", somfy_addr+3);
+      App.register_component(somfy_remote);
+      return somfy_remote->covers;
+
+    covers:
+      - id: "somfy1"
+        name: "Somfy CH01 North"
+      - id: "somfy2"
+        name: "Somfy CH02 Center"
+      - id: "somfy3"
+        name: "Somfy CH03 South"
+      - id: "somfy4"
+        name: "Somfy CH04 All"
+
+
+button:
+  - platform: factory_reset
+    name: Restart with Factory Default Settings
+  - platform: template
+    name: "PROG01"
+    on_press:
+      - lambda: |-
+          ((SomfyESPCover*)id(somfy1))->program();
+  - platform: template
+    name: "PROG02"
+    on_press:
+      - lambda: |-
+          ((SomfyESPCover*)id(somfy2))->program();
+  - platform: template
+    name: "PROG03"
+    on_press:
+      - lambda: |-
+          ((SomfyESPCover*)id(somfy3))->program();
+  - platform: template
+    name: "PROG04"
+    on_press:
+      - lambda: |-
+          ((SomfyESPCover*)id(somfy4))->program();
