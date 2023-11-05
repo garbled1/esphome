@@ -19,6 +19,7 @@ dallas:
 # [18:10:35][D][dallas.sensor:082]:     0xAF03079779B99328
 # [18:10:35][D][dallas.sensor:082]:     0xC00307977932DB28
 # [18:15:22][D][dallas.sensor:082]:     0xB300000527CEA628
+# [15:01:17][D][dallas.sensor:084]:     0xcf030797791ae428
  
 
 sensor:
@@ -32,7 +33,8 @@ sensor:
     name: Kitchen Freezer
 # B
   - platform: dallas
-    address: 0xAF03079779B99328
+#    address: 0xAF03079779B99328
+    address: 0xCF030797791AE428
     name: Kitchen Fridge
 # C
   - platform: dallas
