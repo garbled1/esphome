@@ -119,3 +119,23 @@ button:
     on_press:
       - lambda: |-
           ((SomfyESPCover*)id(somfy4))->program();
+  - platform: template
+    name: "Stop CH01 North"
+    on_press:
+      - lambda: |-
+          ((SomfyESPCover*)id(somfy1))->stop();
+  - platform: template
+    name: "Stop CH02 Center"
+    on_press:
+      - lambda: |-
+          ((SomfyESPCover*)id(somfy2))->stop();
+  - platform: template
+    name: "Stop CH03 South"
+    on_press:
+      - lambda: |-
+          ((SomfyESPCover*)id(somfy3))->stop();
+  - platform: template
+    name: "Stop CH04 All"
+    on_press:
+      - lambda: |-
+          ((SomfyESPCover*)id(somfy4))->stop();
